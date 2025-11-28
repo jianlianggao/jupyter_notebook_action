@@ -55,4 +55,4 @@ jobs:
         MPLBACKEND: Agg    # ensures headless Matplotlib works in CI
         IMG_TOL: "0.0"  # set tolerance for image comparison
       run: |
-        pytest -q
+        pytest -q -s
