@@ -59,12 +59,11 @@ jobs:
         root = Path(".").resolve()
         nbs = []
         nbs += list(root.glob("*.ipynb"))
-        nb_dir = root / "notebooks"
-        if nb_dir.exists():
-          nbs += list(nb_dir.rglob("*.ipynb"))
+        # nb_dir = root / "notebooks"
+        # if nb_dir.exists():
+          # nbs += list(nb_dir.rglob("*.ipynb"))
         # Exclusions
-        nbs = [p for p in nbs
-        if ".ipynb_checkpoints" not in str(p) and "tests" not in p.parts and p.name not in ("baseline.ipynb",)]
+        nbs = [p for p in nbs if ".ipynb_checkpoints" not in str(p) and "tests" not in p.parts ]
         print("Executing notebooks:", [str(p) for p in nbs])
         for nb in nbs:
           subprocess.run([
