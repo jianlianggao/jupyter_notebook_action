@@ -73,8 +73,8 @@ def test_xy_matches_baseline(txt_name):
     assert actual.exists(), f"No TXT output from notebook: {actual}"
 
     # Load numeric arrays (ignore header), robust to tabs/spaces
-    exp = np.loadtxt(expected, comments=None)   # shape: (N, 2)
-    act = np.loadtxt(actual, comments=None)     # shape: (N, 2)
+    exp = np.loadtxt(expected, delimiter="\t")   # shape: (N, 2)
+    act = np.loadtxt(actual, delimiter="\t")     # shape: (N, 2)
 
     assert exp.shape == act.shape, (
         f"Shape mismatch for {txt_name}: baseline={exp.shape}, actual={act.shape}"
