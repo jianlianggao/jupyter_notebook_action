@@ -8,6 +8,8 @@ on:
     branches: [ "main" ]
     paths:
       - "**.ipynb"
+      - "baseline/**"
+      - "tests/**"
       - ".github/workflows/python-app.yml"
       - "requirements.txt"
       - "**.py"
@@ -31,7 +33,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest nbval jupyter ipykernel matplotlib
+        pip install flake8 pytest pytest-mpl nbval jupyter ipykernel matplotlib
         # Project deps from requirements.txt (if present)
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         # If your project is a package:
@@ -48,9 +50,17 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Test notebooks with nbval
+    - name: Run image comparison tests
       env:
         MPLBACKEND: Agg    # ensures headless Matplotlib works in CI
+        IMG_TOL: "0.0"  # set tolerance for image comparison
       run: |
-        # Use the current environment kernel so notebooks see the same packages
-        pytest --nbval-lax --current-env -q
+        pytest -q
+    - name: Upload result images (for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plot-results
+          path: |
+            results
+            baseline
