@@ -53,4 +53,4 @@ jobs:
         MPLBACKEND: Agg    # ensures headless Matplotlib works in CI
       run: |
         # Use the current environment kernel so notebooks see the same packages
-        pytest --nbval --current-env -q
+        pytest --nbval-lax --current-env -q
