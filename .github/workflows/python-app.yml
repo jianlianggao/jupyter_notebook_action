@@ -64,8 +64,8 @@ jobs:
           nbs += list(nb_dir.rglob("*.ipynb"))
         # Exclusions
         nbs = [p for p in nbs
-        if ".ipynb_checkpoints" not in str(p) and "tests" not in p.parts and p.name not in ("baseline.ipynb",)]:
-          print("Executing notebooks:", [str(p) for p in nbs])
+        if ".ipynb_checkpoints" not in str(p) and "tests" not in p.parts and p.name not in ("baseline.ipynb",)]
+        print("Executing notebooks:", [str(p) for p in nbs])
         for nb in nbs:
           subprocess.run([
               "jupyter", "nbconvert",
