@@ -58,5 +58,5 @@ jobs:
         XY_ABS_TOL: "0.0"
         XY_REL_TOL: "0.0"
       run: |
-        pytest -q -s tests/test_mage_compare.py
+        pytest -q -s /tests/test_mage_compare.py
       
