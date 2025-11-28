@@ -31,14 +31,26 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest matplotlib
+        pip install flake8 pytest nbval jupyter ipykernel matplotlib
+        # Project deps from requirements.txt (if present)
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        # If your project is a package:
+        if [ -f setup.py ] || [ -f pyproject.toml ]; then pip install -e.; fi
+
+    - name: Quick sanity check
+      run: |
+        python -c "import sys; print('Python:', sys.version)"
+        python -c "import matplotlib; print('Matplotlib:', matplotlib.__version__)"
+        python -c "import nbval, jupyter, ipykernel; print('nbval/jupyter/ipykernel OK')"
+
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
+        flake8. --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8. --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test notebooks with nbval
+      env:
+        MPLBACKEND: Agg    # ensures headless Matplotlib works in CI
       run: |
+        # Use the current environment kernel so notebooks see the same packages
         pytest --nbval --current-env -q
