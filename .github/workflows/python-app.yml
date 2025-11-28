@@ -10,6 +10,7 @@ on:
       - "**.ipynb"
       - "baseline/**"
       - "tests/**"
+      - "results/**"
       - ".github/workflows/python-app.yml"
       - "requirements.txt"
       - "**.py"
@@ -33,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest pytest-mpl nbval jupyter ipykernel matplotlib
+        pip install flake8 pytest pytest-mpl nbval jupyter ipykernel matplotlib numpy hashlib Pillow
         # Project deps from requirements.txt (if present)
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         # If your project is a package:
