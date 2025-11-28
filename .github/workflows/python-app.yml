@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest pytest-mpl nbval jupyter ipykernel matplotlib numpy Pillow
+        pip install flake8 pytest pytest-mpl nbval jupyter ipykernel matplotlib numpy Pillow ipynbname
         # Project deps from requirements.txt (if present)
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         # If your project is a package:
@@ -50,6 +50,31 @@ jobs:
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Execute all notebooks (dynamic)
+      run: |
+        python - <<'PY'
+          from pathlib import Path
+          import subprocess, sys
+          root = Path(".").resolve()
+          nbs = []
+          nbs += list(root.glob("*.ipynb"))
+          nb_dir = root / "notebooks"
+          if nb_dir.exists():
+            nbs += list(nb_dir.rglob("*.ipynb"))
+          # Exclusions
+          nbs = [p for p in nbs
+          if ".ipynb_checkpoints" not in str(p) and "tests" not in p.parts and p.name not in ("baseline.ipynb",)]:
+            print("Executing notebooks:", [str(p) for p in nbs])
+          for nb in nbs:
+            subprocess.run([
+                "jupyter", "nbconvert",
+                "--to", "notebook", "--execute", "--inplace",
+                "--ExecutePreprocessor.timeout=300",
+              str(nb)
+              ], check=True)
+          PY
+
     - name: List baseline/results
       run: |
         echo "PWD: $(pwd)"
