@@ -58,5 +58,5 @@ jobs:
         XY_ABS_TOL: "0.0"
         XY_REL_TOL: "0.0"
       run: |
-        pytest -q -rs tests/test_image_compare.py
+        pytest -q -rs test_image_compare.py
       
