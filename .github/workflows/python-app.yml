@@ -53,6 +53,6 @@ jobs:
     - name: Run image comparison tests
       env:
         MPLBACKEND: Agg    # ensures headless Matplotlib works in CI
-        IMG_TOL: "5.0"  # set tolerance for image comparison
+        IMG_TOL: "0.0"  # set tolerance for image comparison
       run: |
         pytest -q
