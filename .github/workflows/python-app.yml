@@ -56,11 +56,3 @@ jobs:
         IMG_TOL: "0.0"  # set tolerance for image comparison
       run: |
         pytest -q
-    - name: Upload result images (for debugging)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: plot-results
-          path: |
-            results
-            baseline
