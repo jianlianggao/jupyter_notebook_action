@@ -53,26 +53,24 @@ jobs:
 
     - name: Execute all notebooks (dynamic)
       run: |
-        python - <<'PY'
-        from pathlib import Path
-        import subprocess, sys
-        root = Path(".").resolve()
-        nbs = []
-        nbs += list(root.glob("*.ipynb"))
-        # nb_dir = root / "notebooks"
-        # if nb_dir.exists():
-          # nbs += list(nb_dir.rglob("*.ipynb"))
-        # Exclusions
-        nbs = [p for p in nbs if ".ipynb_checkpoints" not in str(p) and "tests" not in p.parts ]
-        print("Executing notebooks:", [str(p) for p in nbs])
-        for nb in nbs:
-          subprocess.run([
-              "jupyter", "nbconvert",
-              "--to", "notebook", "--execute", "--inplace",
-              "--ExecutePreprocessor.timeout=300",
-            str(nb)
-            ], check=True)
-        PY
+        set -e
+        shopt -s nullglob
+        NOTEBOOKS=(*.ipynb)
+        if [ -d notebooks ]; then
+          NOTEBOOKS+=($(find notebooks -name '*.ipynb' -not -path '*/.ipynb_checkpoints/*'))
+        fi
+        echo "Executing notebooks:"
+        for nb in "${NOTEBOOKS[@]}"; do
+          base="$(basename "$nb")"
+          if [[ "$base" == "baseline.ipynb" ]] || [[ "$nb" == tests/* ]]; then
+            continue
+          fi
+          stem="${base%.ipynb}"
+          echo "  -> $nb (NOTEBOOK_STEM=$stem)"
+          NOTEBOOK_STEM="$stem" jupyter nbconvert \
+            --to notebook --execute --inplace \
+            --ExecutePreprocessor.timeout=300 "$nb"
+        done
 
     - name: List baseline/results
       run: |
