@@ -27,6 +27,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+	lfs: true
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
@@ -34,7 +36,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest pytest-mpl nbval jupyter ipykernel matplotlib numpy Pillow ipynbname
+        pip install flake8 pytest pytest-mpl nbval jupyter ipykernel matplotlib numpy Pillow ipynbname "llama-cpp-python==0.2.60"
         # Project deps from requirements.txt (if present)
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         # If your project is a package:
@@ -85,6 +87,10 @@ jobs:
         ls -la baseline || true
         echo "Results:"
         ls -la results || true
+
+    - name: Run Gemma-based evaluation
+      run: |
+        python tools/gemma_evaluate.py
 
     - name: Run image comparison tests
       env:
