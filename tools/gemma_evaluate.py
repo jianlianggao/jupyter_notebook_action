@@ -4,7 +4,9 @@ import json
 from llama_cpp import Llama
 
 MODEL_PATH = "models/gemma-3-270m-q8_0.gguf"
-
+print("CWD:", Path.cwd())
+print("MODEL_PATH:", MODEL_PATH)
+print("MODEL_EXISTS:", Path(MODEL_PATH).is_file())
 def collect_code(max_chars=6000):
     files = []
     for pattern in ["*.py", "*.ipynb"]:
