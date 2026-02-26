@@ -51,7 +51,7 @@ def main():
         n_ctx=2048,
         n_threads=2,   # GitHub runners have ~2 cores
         n_batch=128,
-        verbose=False,
+        verbose=True,
     )
 
     prompt = build_prompt()
