@@ -48,7 +48,7 @@ def main():
     print("Loading Gemma model...")
     llm = Llama(
         model_path=MODEL_PATH,
-        n_ctx=2048,
+        n_ctx=20480,
         n_threads=2,   # GitHub runners have ~2 cores
         n_batch=128,
         verbose=True,
