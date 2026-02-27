@@ -88,9 +88,9 @@ jobs:
         echo "Results:"
         ls -la results || true
 
-    - name: Run Gemma-based evaluation
+    - name: Run Llama-based evaluation
       run: |
-        python tools/gemma_evaluate.py
+        python tools/llama_evaluate.py
 
     - name: Run image comparison tests
       env:
