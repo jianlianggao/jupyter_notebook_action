@@ -110,7 +110,13 @@ Text:
     print("----- prompt -----")
     print(prompt)
     print("------------------")
-
+    llm = Llama(
+        model_path=MODEL_PATH,
+        n_ctx=131072,
+        n_threads=2,   # GitHub runners have ~2 cores
+        n_batch=128,
+        verbose=False,
+    )
     resp = llm(prompt, max_tokens=256, temperature=0.5)
     raw = resp["choices"][0]["text"].strip()
     print("----- raw output -----")
@@ -147,7 +153,7 @@ def evaluate_multiple_notebooks(folder: str):
     for nb_path in sorted(folder.glob("test*.ipynb")):
         print(f"\n=== Processing notebook: {nb_path} ===")
         markdown_cells = extract_markdown_from_notebook_clean(str(nb_path))
-        nb_results = evaluate_text_with_llama(markdown_cells)
+        nb_results = evaluate_text_plain(markdown_cells)
         print("EVALUATION:", nb_results)
         all_results.extend(nb_results)
 
@@ -155,13 +161,7 @@ def evaluate_multiple_notebooks(folder: str):
 
 def main():
     print("Loading Llama model...")
-    llm = Llama(
-        model_path=MODEL_PATH,
-        n_ctx=131072,
-        n_threads=2,   # GitHub runners have ~2 cores
-        n_batch=128,
-        verbose=False,
-    )
+    
     evaluate_multiple_notebooks(Path.cwd())
 if __name__ == "__main__":
     main()
