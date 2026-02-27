@@ -24,6 +24,49 @@ def collect_code(max_chars=6000):
             text = text[:max_chars] + "\n# [TRUNCATED]"
         chunks.append(f"--- FILE: {f} ---\n{text}")
     return "\n\n".join(chunks) if chunks else "No student code found."
+def is_heading_only_markdown(text: str) -> bool:
+    """
+    Return True if the markdown text consists only of heading lines
+    (lines starting with #) and/or blank lines.
+    """
+    lines = text.splitlines()
+    has_nonempty_line = False
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            # blank line
+            continue
+        has_nonempty_line = True
+        # line must start with one or more '#' to be considered heading
+        if not stripped.startswith("#"):
+            return False
+
+    # If there are no non-empty lines, treat as not heading-only (you can decide)
+    if not has_nonempty_line:
+        return False
+
+    return True
+
+def strip_leading_headings(text: str) -> str:
+    """
+    Remove leading heading lines (#...) at the top of the cell,
+    but keep the rest of the content.
+    """
+    lines = text.splitlines()
+    new_lines = []
+    non_heading_seen = False
+
+    for line in lines:
+        stripped = line.strip()
+        if not non_heading_seen and stripped.startswith("#"):
+            # skip leading heading lines
+            continue
+        else:
+            non_heading_seen = True
+            new_lines.append(line)
+
+    return " ".join(new_lines)
 
 def extract_markdown_from_notebook_clean(nb_path: str):
     nb_path = Path(nb_path)
