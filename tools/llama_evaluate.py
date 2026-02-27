@@ -117,7 +117,12 @@ Text:
         n_batch=128,
         verbose=False,
     )
-    resp = llm(prompt, max_tokens=256, temperature=0.5)
+    resp = llm(prompt, 
+               max_tokens=256, 
+               temperature=0.7,
+               top_k=20,
+               top_p=0.9
+               )
     raw = resp["choices"][0]["text"].strip()
     print("----- raw output -----")
     print(repr(raw))
