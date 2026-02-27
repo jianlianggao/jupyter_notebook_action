@@ -138,15 +138,7 @@ Be strict but fair. Do not add any text outside the JSON.
 """
     return instructions + "\n\nSTUDENT CODE:\n\n" + code
 
-def main():
-    print("Loading Llama model...")
-    llm = Llama(
-        model_path=MODEL_PATH,
-        n_ctx=131072,
-        n_threads=2,   # GitHub runners have ~2 cores
-        n_batch=128,
-        verbose=False,
-    )
+
 
 def evaluate_multiple_notebooks(folder: str):
     folder = Path(folder)
@@ -160,5 +152,16 @@ def evaluate_multiple_notebooks(folder: str):
         all_results.extend(nb_results)
 
     return all_results
+
+def main():
+    print("Loading Llama model...")
+    llm = Llama(
+        model_path=MODEL_PATH,
+        n_ctx=131072,
+        n_threads=2,   # GitHub runners have ~2 cores
+        n_batch=128,
+        verbose=False,
+    )
+    evaluate_multiple_notebooks(Path.cwd())
 if __name__ == "__main__":
-    evaluate_multiple_notebooks("./")
+    main()
