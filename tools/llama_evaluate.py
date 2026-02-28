@@ -163,7 +163,7 @@ def evaluate_multiple_notebooks(folder: str):
         markdown_cells = extract_markdown_from_notebook_clean(str(nb_path))
         nb_results = evaluate_text_plain(markdown_cells)
         print("EVALUATION:", nb_results)
-        all_results.extend(nb_results)
+        all_results.append(nb_results)
 
     return all_results
 
