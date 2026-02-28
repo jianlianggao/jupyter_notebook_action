@@ -170,12 +170,12 @@ def evaluate_multiple_notebooks(folder: str):
 def main():
     print("Loading Llama model...")
     
-    evaluate_multiple_notebooks(Path.cwd())
+    results = evaluate_multiple_notebooks(Path.cwd())
     SUMMARY_PATH.parent.mkdir(exist_ok=True)
     with SUMMARY_PATH.open("w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
     print(f"[INFO] Wrote summary to {SUMMARY_PATH.resolve()}")
-    
+
 if __name__ == "__main__":
     main()
