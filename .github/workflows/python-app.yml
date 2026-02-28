@@ -100,4 +100,9 @@ jobs:
         XY_REL_TOL: "0.0"
       run: |
         pytest -q -rs test_image_compare.py
+    - name: Upload Llama evaluation summary
+      uses: actions/upload-artifact@v4
+      with:
+        name: llama-eval-summary
+        path: results/llama_summary.json
       
