@@ -7,6 +7,9 @@ MODEL_PATH = "models/Llama-3.2-1B.Q4_K_M.gguf"
 print("CWD:", Path.cwd())
 print("MODEL_PATH:", MODEL_PATH)
 print("MODEL_EXISTS:", Path(MODEL_PATH).is_file())
+
+SUMMARY_PATH = Path("results/llama_summary.json")
+
 def collect_code(max_chars=6000):
     files = []
     for pattern in ["*.py", "*.ipynb"]:
@@ -168,5 +171,11 @@ def main():
     print("Loading Llama model...")
     
     evaluate_multiple_notebooks(Path.cwd())
+    SUMMARY_PATH.parent.mkdir(exist_ok=True)
+    with SUMMARY_PATH.open("w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2, ensure_ascii=False)
+
+    print(f"[INFO] Wrote summary to {SUMMARY_PATH.resolve()}")
+    
 if __name__ == "__main__":
     main()
