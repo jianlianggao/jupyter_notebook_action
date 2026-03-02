@@ -7,11 +7,17 @@ import pytest
 from PIL import Image
 from matplotlib.testing.compare import compare_images
 import numpy as np
+import csv
 
 # Root anchored to current working directory; override with REPO_ROOT if needed
 REPO_ROOT = Path(os.environ.get("REPO_ROOT", Path.cwd())).resolve()
 BASELINE_DIR = REPO_ROOT / "baseline"
 RESULTS_DIR = REPO_ROOT / "results"
+
+NUMERIC_SUMMARY_CSV = RESULTS_DIR / "numeric_summary.csv"    # NEW
+
+# In‑memory collection of per‑file results
+NUMERIC_RESULTS = []
 
 # Baseline stems (single expected for many actuals)
 BASELINE_IMAGE = BASELINE_DIR / "test000.png"
@@ -122,3 +128,63 @@ def test_each_txt_against_baseline(actual_txt: Path):
         )
     else:
         print(f"[OK] Numeric match: {actual.name} vs {expected.name}")
+        # Record success (max_diff may be 0 or small float)
+        NUMERIC_RESULTS.append({
+            "file": str(actual),
+            "status": "ok",
+            "max_diff": float(diff.max()) if diff.size > 0 else 0.0,
+            "first_bad_index": "",
+            "baseline_value": "",
+            "actual_value": "",
+            "diff": "",
+            "tol_at_index": "",
+            "abs_tol": XY_ABS_TOL,
+            "rel_tol": XY_REL_TOL,
+        })
+
+def pytest_sessionfinish(session, exitstatus):
+    """
+    Called after all tests finish. Write numeric comparison summary to
+    results/numeric_summary.csv
+    """
+    RESULTS_DIR.mkdir(exist_ok=True)
+
+    # Optional JSON summary (nice for programmatic use)
+    summary = {
+        "exitstatus": exitstatus,
+        "total": len(NUMERIC_RESULTS),
+        "passed": sum(1 for r in NUMERIC_RESULTS if r["status"] == "ok"),
+        "failed": sum(1 for r in NUMERIC_RESULTS if r["status"] == "fail"),
+        "details": NUMERIC_RESULTS,
+    }
+    
+
+    # CSV summary (spreadsheet‑friendly)
+    fieldnames = [
+        "file",
+        "status",
+        "max_diff",
+        "first_bad_index",
+        "baseline_value",
+        "actual_value",
+        "diff",
+        "tol_at_index",
+        "abs_tol",
+        "rel_tol",
+    ]
+
+    with NUMERIC_SUMMARY_CSV.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in NUMERIC_RESULTS:
+            # Flatten tuple index to a string like "(i,j)" for CSV
+            idx = row.get("first_bad_index", "")
+            if isinstance(idx, tuple):
+                idx_str = "(" + ",".join(str(i) for i in idx) + ")"
+            else:
+                idx_str = idx
+            csv_row = dict(row)
+            csv_row["first_bad_index"] = idx_str
+            writer.writerow(csv_row)
+
+    print(f"[INFO] Wrote numeric CSV summary to {NUMERIC_SUMMARY_CSV.resolve()}")
