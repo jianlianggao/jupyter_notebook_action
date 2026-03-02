@@ -3,7 +3,7 @@ import json, re
 
 from llama_cpp import Llama
 
-MODEL_PATH = "models/Llama-3.2-1B.Q4_K_M.gguf"
+MODEL_PATH = "models/Qwen2.5-1.5B-Instruct-Q4_0.gguf"
 print("CWD:", Path.cwd())
 print("MODEL_PATH:", MODEL_PATH)
 print("MODEL_EXISTS:", Path(MODEL_PATH).is_file())
