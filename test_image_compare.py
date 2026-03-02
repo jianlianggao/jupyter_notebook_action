@@ -141,6 +141,38 @@ def test_each_txt_against_baseline(actual_txt: Path):
             "abs_tol": XY_ABS_TOL,
             "rel_tol": XY_REL_TOL,
         })
+        RESULTS_DIR.mkdir(exist_ok=True)
+    
+
+        # CSV summary (spreadsheet‑friendly)
+        fieldnames = [
+            "file",
+            "status",
+            "max_diff",
+            "first_bad_index",
+            "baseline_value",
+            "actual_value",
+            "diff",
+            "tol_at_index",
+            "abs_tol",
+            "rel_tol",
+        ]
+
+        with NUMERIC_SUMMARY_CSV.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in NUMERIC_RESULTS:
+                # Flatten tuple index to a string like "(i,j)" for CSV
+                idx = row.get("first_bad_index", "")
+                if isinstance(idx, tuple):
+                    idx_str = "(" + ",".join(str(i) for i in idx) + ")"
+                else:
+                    idx_str = idx
+                csv_row = dict(row)
+                csv_row["first_bad_index"] = idx_str
+                writer.writerow(csv_row)
+
+        print(f"[INFO] Wrote numeric CSV summary to {NUMERIC_SUMMARY_CSV.resolve()}")
 
 def pytest_sessionfinish(session, exitstatus):
     """
@@ -148,15 +180,6 @@ def pytest_sessionfinish(session, exitstatus):
     results/numeric_summary.csv
     """
     RESULTS_DIR.mkdir(exist_ok=True)
-
-    # Optional JSON summary (nice for programmatic use)
-    summary = {
-        "exitstatus": exitstatus,
-        "total": len(NUMERIC_RESULTS),
-        "passed": sum(1 for r in NUMERIC_RESULTS if r["status"] == "ok"),
-        "failed": sum(1 for r in NUMERIC_RESULTS if r["status"] == "fail"),
-        "details": NUMERIC_RESULTS,
-    }
     
 
     # CSV summary (spreadsheet‑friendly)
