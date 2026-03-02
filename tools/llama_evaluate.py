@@ -152,6 +152,39 @@ Be strict but fair. Do not add any text outside the JSON.
 """
     return instructions + "\n\nSTUDENT CODE:\n\n" + code
 
+def evaluate_single_notebook(nb_path: Path):
+    """
+    Evaluate one notebook and return a structured record.
+    """
+    print(f"\n=== Processing notebook: {nb_path} ===")
+    markdown_cells = extract_markdown_from_notebook_clean(str(nb_path))
+
+    if not markdown_cells:
+        print("[INFO] No markdown content found.")
+        return {
+            "notebook": str(nb_path),
+            "status": "no_markdown",
+            "evaluation": "",
+            "error": None,
+        }
+
+    try:
+        eval_text = evaluate_text_plain(markdown_cells)
+        print("EVALUATION:", eval_text)
+        return {
+            "notebook": str(nb_path),
+            "status": "ok",
+            "evaluation": eval_text,
+            "error": None,
+        }
+    except Exception as e:
+        print(f"[ERROR] Evaluation failed for {nb_path}: {e}")
+        return {
+            "notebook": str(nb_path),
+            "status": "error",
+            "evaluation": "",
+            "error": repr(e),
+        }
 
 
 def evaluate_multiple_notebooks(folder: str):
@@ -160,9 +193,7 @@ def evaluate_multiple_notebooks(folder: str):
 
     for nb_path in sorted(folder.glob("test*.ipynb")):
         print(f"\n=== Processing notebook: {nb_path} ===")
-        markdown_cells = extract_markdown_from_notebook_clean(str(nb_path))
-        nb_results = evaluate_text_plain(markdown_cells)
-        print("EVALUATION:", nb_results)
+        nb_results = evaluate_single_notebook(str(nb_path))
         all_results.append(nb_results)
 
     return all_results
