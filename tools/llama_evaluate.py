@@ -1,5 +1,5 @@
 from pathlib import Path
-import json, re
+import json, re, csv
 
 from llama_cpp import Llama
 
@@ -9,6 +9,7 @@ print("MODEL_PATH:", MODEL_PATH)
 print("MODEL_EXISTS:", Path(MODEL_PATH).is_file())
 
 SUMMARY_PATH = Path("results/llama_summary.json")
+SUMMARY_CSV_PATH = Path("results/llama_summary.csv")
 
 def collect_code(max_chars=6000):
     files = []
@@ -202,11 +203,26 @@ def main():
     print("Loading Llama model...")
     
     results = evaluate_multiple_notebooks(Path.cwd())
-    SUMMARY_PATH.parent.mkdir(exist_ok=True)
-    with SUMMARY_PATH.open("w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+    #SUMMARY_PATH.parent.mkdir(exist_ok=True)
+    #with SUMMARY_PATH.open("w", encoding="utf-8") as f:
+    #    json.dump(results, f, indent=2, ensure_ascii=False)
 
-    print(f"[INFO] Wrote summary to {SUMMARY_PATH.resolve()}")
+    #print(f"[INFO] Wrote summary to {SUMMARY_PATH.resolve()}")
+    SUMMARY_CSV_PATH.parent.mkdir(exist_ok=True)
+    fieldnames = ["notebook", "status", "evaluation", "error"]
+    with SUMMARY_CSV_PATH.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in results:
+            # Ensure only known keys are written
+            writer.writerow({
+                "notebook": row.get("notebook", ""),
+                "status": row.get("status", ""),
+                "evaluation": row.get("evaluation", ""),
+                "error": row.get("error", ""),
+            })
+
+    print(f"[INFO] Wrote Llama evaluation CSV to {SUMMARY_CSV_PATH.resolve()}")
 
 if __name__ == "__main__":
     main()

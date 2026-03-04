@@ -111,5 +111,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: llama-eval-summary
-        path: results/llama_summary.json
+        path: results/llama_summary.csv
       
