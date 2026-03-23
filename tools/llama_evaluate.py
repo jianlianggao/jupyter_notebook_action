@@ -96,12 +96,24 @@ def extract_markdown_from_notebook_clean(nb_path: str):
             markdown_cells.append(cleaned)
 
     return markdown_cells
+
+def text_is_too_short(text: str, min_words: int = 50) -> bool:
+    """
+    Return True if the text is considered too short to meaningfully evaluate.
+    """
+    if isinstance(text, list):
+        text = "".join(text)
+    text = str(text).strip()
+    if len(text) < min_words:
+        return True
+    return False
+
 def evaluate_text_plain(text):
     # Make sure text is a string, not ['...']
     if isinstance(text, list):
         text = "".join(text)
     text = str(text)
-
+    
     prompt = f"""
 You are a teacher. Read the following student text and briefly evaluate it
 in terms of content, organization, language use, and mechanics.
@@ -168,7 +180,14 @@ def evaluate_single_notebook(nb_path: Path):
             "evaluation": "",
             "error": None,
         }
-
+    if text_is_too_short(markdown_cells):
+        print("[INFO] Text is too short, skipping LLM evaluation.")
+        return {
+            "notebook": str(nb_path),
+            "status": "too_short",
+            "evaluation": "[TOO_SHORT] The text is too short to evaluate meaningfully.",
+            "error": None,
+        }
     try:
         eval_text = evaluate_text_plain(markdown_cells)
         print("EVALUATION:", eval_text)
