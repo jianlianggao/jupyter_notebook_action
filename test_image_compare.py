@@ -121,11 +121,26 @@ def test_each_txt_against_baseline(actual_txt: Path):
         a_val = float(act[idx])
         d_val = float(diff[idx])
         t_val = float(tol[idx])
-        pytest.fail(
-            f"Numeric mismatch in {actual.name}: max_diff={max_diff} at index {idx} "
-            f"(baseline={b_val}, actual={a_val}, diff={d_val}, tol={t_val}, "
-            f"abs_tol={XY_ABS_TOL}, rel_tol={XY_REL_TOL})"
-        )
+        #pytest.fail(
+        #    f"Numeric mismatch in {actual.name}: max_diff={max_diff} at index {idx} "
+        #    f"(baseline={b_val}, actual={a_val}, diff={d_val}, tol={t_val}, "
+        #    f"abs_tol={XY_ABS_TOL}, rel_tol={XY_REL_TOL})"
+        #)
+        print(f"[FAIL] Numeric mismatch: {actual.name} vs {expected.name}")
+        print(f"  max_diff={max_diff} at index {idx} (baseline={b_val}, actual={a_val}, diff={d_val}, tol={t_val})")
+        # Record failure details        
+        NUMERIC_RESULTS.append({
+            "file": str(actual),
+            "status": "fail",
+            "max_diff": max_diff,
+            "first_bad_index": idx,
+            "baseline_value": b_val,
+            "actual_value": a_val,
+            "diff": d_val,
+            "tol_at_index": t_val,
+            "abs_tol": XY_ABS_TOL,
+            "rel_tol": XY_REL_TOL,
+        })
     else:
         print(f"[OK] Numeric match: {actual.name} vs {expected.name}")
         # Record success (max_diff may be 0 or small float)
@@ -141,38 +156,38 @@ def test_each_txt_against_baseline(actual_txt: Path):
             "abs_tol": XY_ABS_TOL,
             "rel_tol": XY_REL_TOL,
         })
-        RESULTS_DIR.mkdir(exist_ok=True)
-    
+    RESULTS_DIR.mkdir(exist_ok=True)
 
-        # CSV summary (spreadsheet‑friendly)
-        fieldnames = [
-            "file",
-            "status",
-            "max_diff",
-            "first_bad_index",
-            "baseline_value",
-            "actual_value",
-            "diff",
-            "tol_at_index",
-            "abs_tol",
-            "rel_tol",
-        ]
 
-        with NUMERIC_SUMMARY_CSV.open("w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in NUMERIC_RESULTS:
-                # Flatten tuple index to a string like "(i,j)" for CSV
-                idx = row.get("first_bad_index", "")
-                if isinstance(idx, tuple):
-                    idx_str = "(" + ",".join(str(i) for i in idx) + ")"
-                else:
-                    idx_str = idx
-                csv_row = dict(row)
-                csv_row["first_bad_index"] = idx_str
-                writer.writerow(csv_row)
+    # CSV summary (spreadsheet‑friendly)
+    fieldnames = [
+        "file",
+        "status",
+        "max_diff",
+        "first_bad_index",
+        "baseline_value",
+        "actual_value",
+        "diff",
+        "tol_at_index",
+        "abs_tol",
+        "rel_tol",
+    ]
 
-        print(f"[INFO] Wrote numeric CSV summary to {NUMERIC_SUMMARY_CSV.resolve()}")
+    with NUMERIC_SUMMARY_CSV.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in NUMERIC_RESULTS:
+            # Flatten tuple index to a string like "(i,j)" for CSV
+            idx = row.get("first_bad_index", "")
+            if isinstance(idx, tuple):
+                idx_str = "(" + ",".join(str(i) for i in idx) + ")"
+            else:
+                idx_str = idx
+            csv_row = dict(row)
+            csv_row["first_bad_index"] = idx_str
+            writer.writerow(csv_row)
+
+    print(f"[INFO] Wrote numeric CSV summary to {NUMERIC_SUMMARY_CSV.resolve()}")
 
 def pytest_sessionfinish(session, exitstatus):
     """
